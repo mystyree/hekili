@@ -11,7 +11,7 @@ local CommitKey = ns.commitKey
 local FindUnitBuffByID, FindUnitDebuffByID = ns.FindUnitBuffByID, ns.FindUnitDebuffByID
 local GetItemInfo = ns.CachedGetItemInfo
 local GetResourceInfo, GetResourceKey = ns.GetResourceInfo, ns.GetResourceKey
-local ResetDisabledGearAndSpells = ns.ResetDisabledGearAndSpells
+local IsSpellDisabled = ns.IsSpellDisabled
 local RegisterEvent = ns.RegisterEvent
 local RegisterUnitEvent = ns.RegisterUnitEvent
 
@@ -27,6 +27,8 @@ local mt_resource = ns.metatables.mt_resource
 local GetItemCooldown = _G.GetItemCooldown
 local GetSpellDescription, GetSpellTexture = _G.GetSpellDescription, _G.GetSpellTexture
 local GetSpecialization, GetSpecializationInfo = _G.GetSpecialization, _G.GetSpecializationInfo
+
+local FlagDisabledSpells
 
 
 local specTemplate = {
@@ -5944,6 +5946,23 @@ function Hekili:GetActivePack()
 end
 
 
+do
+    local seen = {}
+
+    FlagDisabledSpells = function()
+        wipe( seen )
+
+        for _, v in pairs( class.abilities ) do
+            if not seen[ v ] then
+                if v.id > 0 then v.disabled = IsSpellDisabled( v.id ) end
+                seen[ v ] = true
+            end
+        end
+    end
+    ns.FlagDisabledSpells = FlagDisabledSpells
+end
+
+
 Hekili.SpecChangeHistory = {}
 
 function Hekili:SpecializationChanged()
@@ -6219,12 +6238,14 @@ function Hekili:SpecializationChanged()
     ns.callHook( "specializationChanged" )
 
     ns.updateTalents()
-    ResetDisabledGearAndSpells()
+    -- ns.updateGear()
 
     state.swings.mh_speed, state.swings.oh_speed = UnitAttackSpeed( "player" )
 
     self:UpdateDisplayVisibility()
     self:UpdateDamageDetectionForCLEU()
+
+    FlagDisabledSpells()
 end
 
 
@@ -6244,15 +6265,17 @@ do
         CHALLENGE_MODE_START = 1,
         CHALLENGE_MODE_RESET = 1,
         CHALLENGE_MODE_COMPLETED = 1,
+        PLAYER_ENTERING_WORLD = 1,
         PLAYER_ALIVE = 1,
         ZONE_CHANGED_NEW_AREA = 1
     }
 
     local WipeCovenantCache = ns.WipeCovenantCache
 
+
     local function CheckSpellsAndGear()
         WipeCovenantCache()
-        ResetDisabledGearAndSpells()
+        FlagDisabledSpells()
         ns.updateGear()
     end
 

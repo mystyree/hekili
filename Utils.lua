@@ -726,55 +726,20 @@ do
     end
     ns.FindStringInConduitTooltip = FindStringInConduitTooltip
 
-    local DisabledSpells = {}
-
     local IsSpellDisabled = function( spellID )
-        if DisabledSpells[ spellID ] ~= nil then return DisabledSpells[ spellID ] end
-
-        local isDisabled = FindStringInSpellTooltip( DisableText, spellID, true, true )
-        DisabledSpells[ spellID ] = isDisabled
-
-        return isDisabled
+        return FindStringInSpellTooltip( DisableText, spellID, true, true )
     end
     ns.IsSpellDisabled = IsSpellDisabled
 
-    local DisabledItems = {}
-
     local IsItemDisabled = function( itemID )
-        if DisabledItems[ itemID ] ~= nil then return DisabledItems[ itemID ] end
-
-        local isDisabled = FindStringInItemTooltip( DisableText, itemID, true, true )
-        DisabledItems[ itemID ] = isDisabled
-
-        return isDisabled
+        return FindStringInItemTooltip( DisableText, itemID, true, true )
     end
     ns.IsItemDisabled = IsItemDisabled
 
-    local DisabledGear = {}
-
     local IsInventoryItemDisabled = function( slot )
-        if DisabledGear[ slot ] ~= nil then return DisabledGear[ slot ] end
-
-        local isDisabled = FindStringInInventoryItemTooltip( DisableText, slot, true, true )
-        DisabledGear[ slot ] = isDisabled
-
-        return isDisabled
+        return FindStringInInventoryItemTooltip( DisableText, slot, true, true )
     end
     ns.IsInventoryItemDisabled = IsInventoryItemDisabled
-
-    local function IsAbilityDisabled( ability )
-        if ability.item then return IsItemDisabled( ability.item ) end
-        if ability.id > 0 then return IsSpellDisabled( ability.id ) end
-        return false
-    end
-    ns.IsAbilityDisabled = IsAbilityDisabled
-
-    local ResetDisabledGearAndSpells = function()
-        wipe( DisabledSpells )
-        wipe( DisabledItems )
-        wipe( DisabledGear )
-    end
-    ns.ResetDisabledGearAndSpells = ResetDisabledGearAndSpells
 
     Hekili.FindStringInTooltip = FindStringInTooltip
     Hekili.FindStringInSpellTooltip = FindStringInSpellTooltip
